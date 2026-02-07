@@ -3,16 +3,21 @@ import React, { useState } from "react";
 
 interface TankProps {
   levelPercent?: number; // 0 to 100
-  totalCapacity?: number; // in Liters
-  lastUpdated?: string;
+  currentVolume?: number; // liters (from backend)
+  isAlive?: boolean;
+  lastUpdated?: number;
 }
 
 const WaterTankMonitor: React.FC<TankProps> = ({
-  levelPercent = 12,
-  totalCapacity = 10000,
+  levelPercent = 0,
+  currentVolume = 0,
+  isAlive = false,
+  lastUpdated,
 }) => {
   const [isAlertEnabled, setIsAlertEnabled] = useState(true);
-  const currentLiters = Math.round((levelPercent / 100) * totalCapacity);
+
+  const displayPercent = Math.round(levelPercent);
+  const displayLiters = Math.round(currentVolume);
 
   return (
     <div className="font-sans text-white transition-colors duration-200 min-h-screen">
@@ -35,10 +40,8 @@ const WaterTankMonitor: React.FC<TankProps> = ({
           {/* Visual Tank Display */}
           <div className="flex flex-col items-center justify-center pt-6 pb-8 px-6">
             <div className="relative w-72 h-[420px] bg-slate-200 dark:bg-[#1a2634] rounded-[3.5rem] border-[8px] border-white dark:border-[#233040] shadow-2xl overflow-hidden box-content ring-1 ring-slate-900/5 dark:ring-white/5 isolate">
-              {/* Inner Shadow Overlay */}
               <div className="absolute inset-0 shadow-[inset_0_0_40px_rgba(0,0,0,0.1)] dark:shadow-[inset_0_0_60px_rgba(0,0,0,0.4)] rounded-[3rem] z-20 pointer-events-none" />
 
-              {/* Grid Pattern */}
               <div
                 className="absolute inset-0 opacity-10 pointer-events-none z-0"
                 style={{
@@ -48,7 +51,6 @@ const WaterTankMonitor: React.FC<TankProps> = ({
                 }}
               />
 
-              {/* Measurement Scale */}
               <div className="absolute right-0 top-16 bottom-16 w-12 flex flex-col justify-between items-end pr-5 pointer-events-none z-30 opacity-50">
                 {[...Array(9)].map((_, i) => (
                   <div
@@ -63,9 +65,8 @@ const WaterTankMonitor: React.FC<TankProps> = ({
               {/* Dynamic Water Level */}
               <div
                 className="absolute bottom-0 left-0 right-0 z-10 transition-all duration-1000 ease-in-out"
-                style={{ height: `${levelPercent}%` }}
+                style={{ height: `${displayPercent}%` }}
               >
-                {/* Wave SVG 1 */}
                 <svg
                   className="absolute -top-[18px] w-full h-[24px] text-[#2b7cee] dark:text-blue-600 opacity-60 transform scale-x-[-1]"
                   preserveAspectRatio="none"
@@ -76,7 +77,7 @@ const WaterTankMonitor: React.FC<TankProps> = ({
                     fill="currentColor"
                   ></path>
                 </svg>
-                {/* Wave SVG 2 */}
+
                 <svg
                   className="absolute -top-[18px] w-full h-[24px] text-[#4fa3ff] dark:text-[#3b82f6]"
                   preserveAspectRatio="none"
@@ -88,29 +89,26 @@ const WaterTankMonitor: React.FC<TankProps> = ({
                   ></path>
                 </svg>
 
-                {/* Water Body */}
                 <div className="h-full w-full bg-gradient-to-b from-[#4fa3ff] to-[#2b7cee] dark:from-[#3b82f6] dark:to-[#1d4ed8]">
-                  {/* Floating Bubbles */}
                   <div className="absolute bottom-12 left-8 w-2 h-2 bg-white/20 rounded-full blur-[1px]" />
                   <div className="absolute bottom-24 right-12 w-3 h-3 bg-white/10 rounded-full blur-[1px]" />
                   <div className="absolute bottom-48 left-1/2 w-1.5 h-1.5 bg-white/20 rounded-full blur-[0.5px]" />
                 </div>
               </div>
 
-              {/* Glass Glare Effect */}
               <div className="absolute inset-0 rounded-[3rem] z-40 pointer-events-none bg-gradient-to-br from-white/30 via-transparent to-transparent opacity-70" />
 
               {/* Level Text Overlay */}
               <div className="absolute inset-0 flex flex-col items-center justify-center z-50">
                 <div className="flex flex-col items-center drop-shadow-md">
                   <h1 className="text-white text-7xl font-extrabold tracking-tighter leading-none">
-                    {levelPercent}
+                    {displayPercent}
                     <span className="text-4xl align-top ml-1 opacity-90">
                       %
                     </span>
                   </h1>
-                  <p className="text-blue-50  dark:text-blue-100 font-medium text-lg mt-2 bg-white/70 backdrop-blur-sm px-4 py-1.5 rounded-full border border-white/20 shadow-sm text-slate-800">
-                    ~{currentLiters.toLocaleString()} L
+                  <p className="text-blue-50 dark:text-blue-100 font-medium text-lg mt-2 bg-white/70 backdrop-blur-sm px-4 py-1.5 rounded-full border border-white/20 shadow-sm text-slate-800">
+                    ~{displayLiters.toLocaleString()} L
                   </p>
                 </div>
               </div>
@@ -123,6 +121,7 @@ const WaterTankMonitor: React.FC<TankProps> = ({
               onClick={() => setIsAlertEnabled(!isAlertEnabled)}
               className="w-full bg-white dark:bg-[#1a2634] p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 flex items-center justify-between group active:scale-[0.99] transition-all"
             >
+              {/* unchanged */}
               <div className="flex items-center gap-4">
                 <div className="size-12 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-600 dark:text-amber-500 group-hover:scale-110 transition-transform">
                   <span className="material-symbols-outlined text-[28px]">
@@ -172,36 +171,18 @@ const WaterTankMonitor: React.FC<TankProps> = ({
                   </p>
                 </div>
               </div>
+
               <div className="grid grid-cols-2 gap-4">
-                <div className="bg-slate-50 dark:bg-[#111820] p-4 rounded-xl border border-slate-100 dark:border-slate-800">
-                  <p className="text-slate-500 text-xs font-medium mb-1 uppercase tracking-wider">
-                    Total Capacity
-                  </p>
-                  <p className="text-slate-900 dark:text-white text-xl font-bold">
-                    {totalCapacity.toLocaleString()} L
-                  </p>
-                </div>
                 <div className="bg-slate-50 dark:bg-[#111820] p-4 rounded-xl border border-slate-100 dark:border-slate-800">
                   <p className="text-slate-500 text-xs font-medium mb-1 uppercase tracking-wider">
                     Current Fill
                   </p>
                   <p className="text-slate-900 dark:text-white text-xl font-bold">
-                    {currentLiters.toLocaleString()} L
+                    {displayLiters.toLocaleString()} L
                   </p>
                 </div>
               </div>
             </div>
-
-            {/* <div className="flex items-center justify-center px-2 py-4 opacity-60">
-              <div className="flex items-center gap-1.5">
-                <span className="material-symbols-outlined text-slate-400 text-[14px]">
-                  <Timer />
-                </span>
-                <p className="text-slate-400 text-xs font-medium">
-                  Updated {lastUpdated}
-                </p>
-              </div>
-            </div> */}
           </div>
         </main>
       </div>
