@@ -42,7 +42,7 @@ export const BuzzerProvider: React.FC<{ children: React.ReactNode }> = ({
     const checkSupport = () => {
       const supportsNotifications = "Notification" in window;
       const supportsAudio = !!document.createElement("audio").canPlayType;
-      const supportsVibration = "vibrate" in navigator;
+      // const supportsVibration = "vibrate" in navigator;
       const supportsServiceWorker = "serviceWorker" in navigator;
 
       setIsSupported(supportsNotifications && supportsAudio);

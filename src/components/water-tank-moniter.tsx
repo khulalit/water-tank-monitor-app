@@ -1,4 +1,4 @@
-import { BellIcon, CloudSync, Droplet, Timer } from "lucide-react";
+import { BellIcon, CloudSync, Droplet } from "lucide-react";
 import React, { useState } from "react";
 
 interface TankProps {
@@ -10,7 +10,6 @@ interface TankProps {
 const WaterTankMonitor: React.FC<TankProps> = ({
   levelPercent = 12,
   totalCapacity = 10000,
-  lastUpdated = "2 mins ago",
 }) => {
   const [isAlertEnabled, setIsAlertEnabled] = useState(true);
   const currentLiters = Math.round((levelPercent / 100) * totalCapacity);
