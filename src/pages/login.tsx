@@ -1,140 +1,196 @@
-import { Droplet, EyeIcon, EyeOff, HelpCircle, LogIn } from "lucide-react";
+import {
+  Droplet,
+  EyeIcon,
+  EyeOff,
+  Ruler,
+  Database,
+  User,
+  KeyRound,
+  Wifi,
+} from "lucide-react";
 import React, { useState } from "react";
 import { useAuth } from "../context/auth-context";
 import { useNavigate } from "react-router";
 
 const LoginPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
-  // Inside your LoginPage component:
+
   const { login } = useAuth();
   const navigate = useNavigate();
+
   const [userVal, setUserVal] = useState("");
   const [keyVal, setKeyVal] = useState("");
 
+  const [tankHeight, setTankHeight] = useState("");
+  const [tankVolume, setTankVolume] = useState("");
+  const [fullGap, setFullGap] = useState("10");
+
   const handleLogin = () => {
-    if (userVal && keyVal) {
-      login(userVal, keyVal);
-      navigate("/");
-    }
+    if (!keyVal || !tankHeight || !tankVolume) return;
+
+    const payload = {
+      username: userVal,
+      apiKey: keyVal,
+      tankHeight: Number(tankHeight),
+      tankVolume: Number(tankVolume),
+      fullGap: Number(fullGap),
+    };
+
+    localStorage.setItem("tank-config", JSON.stringify(payload));
+
+    login(payload);
+
+    navigate("/");
   };
 
   return (
-    <div className="bg-[#f6f7f8] dark:bg-[#101822] font-sans min-h-screen flex flex-col items-center justify-start text-white">
-      <div className="relative flex h-full min-h-screen w-full max-w-[430px] flex-col bg-[#f6f7f8] dark:bg-[#101822] overflow-x-hidden border-x border-gray-200 dark:border-gray-800 shadow-2xl">
-        <div className="flex items-center p-4 pb-2 justify-between">
-          <div className="text-[#2b7cee] flex size-12 shrink-0 items-center justify-center">
-            <span className="material-symbols-outlined text-3xl">
-              <Droplet />
-            </span>
-          </div>
-          <h2 className="text-gray-900 dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center pr-12">
-            Tank Monitor
+    <div className="min-h-screen bg-[#0a0f1c] flex items-center justify-center px-4 font-sans">
+      <div className="relative w-full max-w-[420px] bg-[#101822] rounded-3xl border border-white/10 shadow-[0_30px_90px_rgba(0,0,0,0.7)] overflow-hidden">
+        {/* HEADER */}
+        <div className="flex items-center justify-center gap-3 py-6 border-b border-white/10">
+          <Droplet className="text-[#2b7cee]" size={34} />
+          <h2 className="text-white text-xl font-bold tracking-tight">
+            Tank Monitor Setup
           </h2>
         </div>
 
-        <div className="px-0 sm:px-4 sm:py-3">
-          <div className="w-full bg-gradient-to-br from-[#2b7cee]/30 to-[#101822] flex flex-col justify-end overflow-hidden bg-[#101822] sm:rounded-lg min-h-[200px] relative">
-            <div className="absolute inset-0 opacity-20">
-              <svg
-                height="100%"
-                viewBox="0 0 1000 1000"
-                width="100%"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M0,500 C150,400 350,600 500,500 C650,400 850,600 1000,500 L1000,1000 L0,1000 Z"
-                  fill="#2b7cee"
-                ></path>
-              </svg>
-            </div>
-            <div className="p-6 relative z-10">
-              <h1 className="text-white tracking-tight text-[32px] font-bold leading-tight">
-                Welcome back
-              </h1>
-              <p className="text-gray-300 text-sm mt-1">
-                Manage your water resources efficiently
-              </p>
-            </div>
+        {/* HERO */}
+        <div className="relative px-6 py-9 bg-gradient-to-br from-[#2b7cee]/25 via-[#101822] to-[#101822]">
+          <div className="absolute inset-0 opacity-20">
+            <svg viewBox="0 0 1000 1000" width="100%" height="100%">
+              <path
+                d="M0,500 C150,400 350,600 500,500 C650,400 850,600 1000,500 L1000,1000 L0,1000 Z"
+                fill="#2b7cee"
+              />
+            </svg>
+          </div>
+
+          <div className="relative z-10">
+            <h1 className="text-white text-3xl font-extrabold">
+              Configure Your Tank
+            </h1>
+            <p className="text-blue-200/70 text-sm mt-1">
+              Connect your sensor and tank details
+            </p>
           </div>
         </div>
 
-        <div className="h-6 bg-transparent"></div>
+        {/* FORM */}
+        <div className="p-6 space-y-5">
+          {/* Username */}
+          <div>
+            <p className="text-sm font-semibold pb-2 text-white/80">
+              Username (optional)
+            </p>
 
-        <div className="px-4 flex-1 flex flex-col">
-          <div className="space-y-4">
-            <div className="flex flex-col">
-              <p className="text-gray-900 dark:text-white text-sm font-medium leading-normal pb-2">
-                Username
-              </p>
+            <div className="relative">
+              <User
+                className="absolute left-4 top-3.5 text-white/40"
+                size={18}
+              />
               <input
-                className="flex w-full rounded-lg text-gray-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-[#2b7cee] border border-gray-200 dark:border-[#3b4554] bg-white dark:bg-[#1c2027] h-14 placeholder:text-gray-400 dark:placeholder:text-[#9da8b9] p-[15px] text-base transition-all"
-                placeholder="Enter your username"
-                type="text"
+                className="w-full h-12 rounded-xl bg-[#0b1220] border border-white/10 pl-12 pr-4 text-white outline-none focus:ring-2 focus:ring-[#2b7cee]"
+                placeholder="Enter username"
                 value={userVal}
                 onChange={(e) => setUserVal(e.target.value)}
               />
             </div>
+          </div>
 
-            <div className="flex flex-col">
-              <p className="text-gray-900 dark:text-white text-sm font-medium leading-normal pb-2">
-                API Key
-              </p>
-              <div className="flex w-full items-stretch rounded-lg">
+          {/* API KEY */}
+          <div>
+            <p className="text-sm font-semibold pb-2 text-white">API Key</p>
+
+            <div className="flex">
+              <div className="relative flex-1">
+                <KeyRound
+                  className="absolute left-4 top-3.5 text-white/40"
+                  size={18}
+                />
                 <input
-                  className="flex w-full flex-1 rounded-l-lg text-gray-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-[#2b7cee] border border-gray-200 dark:border-[#3b4554] bg-white dark:bg-[#1c2027] h-14 placeholder:text-gray-400 dark:placeholder:text-[#9da8b9] p-[15px] border-r-0 pr-2 text-base transition-all"
-                  placeholder="Enter your API Key"
+                  className="w-full h-12 rounded-l-xl bg-[#0b1220] border border-white/10 border-r-0 pl-12 pr-4 text-white outline-none focus:ring-2 focus:ring-[#2b7cee]"
+                  placeholder="Enter API Key"
                   type={showPassword ? "text" : "password"}
                   value={keyVal}
                   onChange={(e) => setKeyVal(e.target.value)}
                 />
-                <div className="text-gray-400 dark:text-[#9da8b9] flex border border-gray-200 dark:border-[#3b4554] bg-white dark:bg-[#1c2027] items-center justify-center pr-[15px] rounded-r-lg border-l-0">
-                  <span
-                    className="material-symbols-outlined cursor-pointer hover:text-[#2b7cee] transition-colors"
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
-                    {showPassword ? <EyeOff /> : <EyeIcon />}
-                  </span>
-                </div>
+              </div>
+
+              <div
+                className="h-12 px-4 rounded-r-xl border border-white/10 bg-[#0b1220] flex items-center cursor-pointer hover:bg-white/5"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? <EyeOff /> : <EyeIcon />}
               </div>
             </div>
           </div>
 
-          <div className="flex justify-start px-1 pt-2 pb-6">
-            <a
-              className="text-[#2b7cee] text-sm font-medium hover:underline flex items-center gap-1"
-              href="#"
-            >
-              <span className="material-symbols-outlined text-[18px]">
-                <HelpCircle />
-              </span>
-              Where to find my API Key?
-            </a>
-          </div>
-
-          <div className="py-4">
-            <button
-              className="w-full bg-[#2b7cee] hover:bg-[#2b7cee]/90 text-white font-bold h-14 rounded-xl shadow-lg transition-transform active:scale-[0.98] flex items-center justify-center gap-2"
-              onClick={handleLogin}
-            >
-              Login
-              <span className="material-symbols-outlined">
-                <LogIn />
-              </span>
-            </button>
-          </div>
-
-          <div className="mt-auto py-10 flex flex-col items-center gap-4">
-            <p className="text-gray-500 dark:text-gray-400 text-sm">
-              Don't have an account yet?
+          {/* Tank Height */}
+          <div>
+            <p className="text-sm font-semibold pb-2 text-white">
+              Tank Height (cm)
             </p>
-            <button className="text-gray-900 dark:text-white font-semibold py-2 px-6 border border-gray-200 dark:border-gray-700 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-              Request Access
+
+            <div className="relative">
+              <Ruler
+                className="absolute left-4 top-3.5 text-white/40"
+                size={18}
+              />
+              <input
+                type="number"
+                className="w-full h-12 rounded-xl bg-[#0b1220] border border-white/10 pl-12 pr-4 text-white outline-none focus:ring-2 focus:ring-[#2b7cee]"
+                placeholder="e.g. 120"
+                value={tankHeight}
+                onChange={(e) => setTankHeight(e.target.value)}
+              />
+            </div>
+          </div>
+
+          {/* Tank Volume */}
+          <div>
+            <p className="text-sm font-semibold pb-2 text-white">
+              Total Volume (Liters)
+            </p>
+
+            <div className="relative">
+              <Database
+                className="absolute left-4 top-3.5 text-white/40"
+                size={18}
+              />
+              <input
+                type="number"
+                className="w-full h-12 rounded-xl bg-[#0b1220] border border-white/10 pl-12 pr-4 text-white outline-none focus:ring-2 focus:ring-[#2b7cee]"
+                placeholder="e.g. 1000"
+                value={tankVolume}
+                onChange={(e) => setTankVolume(e.target.value)}
+              />
+            </div>
+          </div>
+
+          {/* Sensor Gap */}
+          <div>
+            <p className="text-sm font-semibold pb-2 text-white">
+              Sensor Offset / Full Gap (cm)
+            </p>
+
+            <input
+              type="number"
+              className="w-full h-12 rounded-xl bg-[#0b1220] border border-white/10 px-4 text-white outline-none focus:ring-2 focus:ring-[#2b7cee]"
+              value={fullGap}
+              onChange={(e) => setFullGap(e.target.value)}
+            />
+          </div>
+
+          {/* BUTTON */}
+          <div className="pt-8">
+            <button
+              onClick={handleLogin}
+              className="w-full h-14 rounded-xl bg-gradient-to-r from-[#2b7cee] to-[#3b82f6] font-bold text-white flex items-center justify-center gap-2 hover:brightness-110 active:scale-[0.98] transition-all shadow-lg"
+            >
+              <Wifi size={18} />
+              Save & Connect
             </button>
           </div>
-        </div>
-
-        <div className="w-full h-1 bg-[#2b7cee]/20">
-          <div className="h-full bg-[#2b7cee] w-2/3"></div>
         </div>
       </div>
     </div>

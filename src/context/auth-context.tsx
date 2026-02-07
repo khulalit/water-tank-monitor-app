@@ -1,56 +1,98 @@
-import { createContext, useContext, useState, type ReactNode } from "react";
-import { redirect } from "react-router";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  type ReactNode,
+} from "react";
+
+/* -----------------------------
+   Types
+--------------------------------*/
+
+export interface TankConfig {
+  username: string | null;
+  apiKey: string;
+  tankHeight: number;
+  tankVolume: number;
+  fullGap: number;
+}
 
 interface AuthContextType {
-  apiKey: string | null;
-  username: string | null;
-  login: (username: string, apiKey: string) => void;
+  config: TankConfig | null;
+  login: (config: TankConfig) => void;
   logout: () => void;
   isAuthenticated: boolean;
 }
 
+/* -----------------------------
+   Storage Key
+--------------------------------*/
+
+const STORAGE_KEY = "tank-config";
+
+/* -----------------------------
+   Context
+--------------------------------*/
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [apiKey, setApiKey] = useState<string | null>(
-    localStorage.getItem("tank_api_key")
-  );
-  const [username, setUsername] = useState<string | null>(
-    localStorage.getItem("tank_username")
-  );
+/* -----------------------------
+   Provider
+--------------------------------*/
 
-  const login = (user: string, key: string) => {
-    localStorage.setItem("tank_api_key", key);
-    localStorage.setItem("tank_username", user);
-    setApiKey(key);
-    setUsername(user);
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const [config, setConfig] = useState<TankConfig | null>(null);
+
+  // Hydrate on load
+  useEffect(() => {
+    const raw = localStorage.getItem(STORAGE_KEY);
+
+    if (raw) {
+      try {
+        setConfig(JSON.parse(raw));
+      } catch {
+        localStorage.removeItem(STORAGE_KEY);
+      }
+    }
+  }, []);
+
+  const login = (cfg: TankConfig) => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(cfg));
+    setConfig(cfg);
   };
 
   const logout = () => {
-    localStorage.removeItem("tank_api_key");
-    localStorage.removeItem("tank_username");
-    setApiKey(null);
-    setUsername(null);
+    localStorage.removeItem(STORAGE_KEY);
+    setConfig(null);
   };
 
-  const isAuthenticated = !!apiKey;
+  const isAuthenticated = !!config?.apiKey;
 
-  if (isAuthenticated) {
-    redirect("/");
-  } else {
-    redirect("/login");
-  }
   return (
     <AuthContext.Provider
-      value={{ apiKey, username, login, logout, isAuthenticated }}
+      value={{
+        config,
+        login,
+        logout,
+        isAuthenticated,
+      }}
     >
       {children}
     </AuthContext.Provider>
   );
 };
 
+/* -----------------------------
+   Hook
+--------------------------------*/
+
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) throw new Error("useAuth must be used within an AuthProvider");
+
+  if (!context) {
+    throw new Error("useAuth must be used inside AuthProvider");
+  }
+
   return context;
 };
